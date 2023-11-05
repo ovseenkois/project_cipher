@@ -41,9 +41,9 @@ def Decode(string, key, language):
             new_string.append(string[i])
     return ''.join(new_string)
 
-def make_window():
+def Make_window():
     layout = [[sg.Button('Back')],
-              [sg.Text('Text to encode:')],
+              [sg.Text('Text:')],
               [sg.Multiline(size=(50, 10), expand_x=True, key='input')],
               [sg.Text('Alphabet'), sg.Text('Type of operation'), sg.Text('Key')],
               [sg.Combo(['rus', 'eng'], default_value='rus', readonly=True, key='language'),
@@ -52,11 +52,11 @@ def make_window():
               [sg.Button('Apply', expand_x=True)],
               [sg.Text('Result:')],
               [sg.Multiline(size=(50, 10), expand_x=True, key='output')]]
-    window = sg.Window('Visener cipher', layout)
+    window = sg.Window('Visener cipher', layout, size=(500, 500))
     return window
 
-def cipher():
-    window = make_window()
+def Cipher():
+    window = Make_window()
     while True:
         event, value = window.read()
         if event == sg.WIN_CLOSED or event == 'Back':

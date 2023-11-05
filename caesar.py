@@ -36,11 +36,12 @@ def Decode(string, shift, language):
     return ''.join(new_string)
 
 
-def make_window():
+def Make_window():
     list_shifts = ['decode without shift']
     list_shifts.extend([str(i) for i in range(1, 40)])
     layout = [[sg.Button('Back')],
-              [sg.Text('Text to encode:')],
+              [sg.Text('Text:')],
+              [sg.Text('Input file: '), sg.InputText(do_not_clear=False, key='input file'), sg.FileBrowse()],
               [sg.Multiline(size=(50, 10), expand_x=True, key='input')],
               [sg.Text('Alphabet'), sg.Text('Type of operation'), sg.Text('Shift')],
               [sg.Combo(['rus', 'eng'], default_value='rus', readonly=True, key='language'),
@@ -48,13 +49,43 @@ def make_window():
                sg.Combo(list_shifts, default_value='3', readonly=True, key='shift')],
               [sg.Button('Apply', expand_x=True)],
               [sg.Text('Result:')],
+              [sg.Text('Output file: '), sg.InputText(do_not_clear=False, key='output file'), sg.FileBrowse()],
               [sg.Multiline(size=(50, 10), expand_x=True, key='output')]]
-    window = sg.Window('Caesar cipher', layout)
+    window = sg.Window('Caesar cipher', layout, size=(500, 500))
     return window
 
 
-def cipher():
-    window = make_window()
+def DecodeWithoutShift(string, language):
+    string = string.lower()
+    if language == 'rus':
+        alphabet = alphabets.rus_alphabet
+        frequency_alphabet = alphabets.rus_frequency
+    else:
+        alphabet = alphabets.eng_alphabet
+        frequency_alphabet = alphabets.eng_frequncy
+    len_alphabet = len(alphabet)
+    min_delta_shift = 999999
+    min_sum_of_delta = 999999
+    for shift in range(len_alphabet):
+        decode_string = Decode(string, shift, language)
+        frequency = {}
+        for i in decode_string:
+            if i in alphabet:
+                if i in frequency.keys():
+                    frequency[i] = (frequency[i] / 100 * len(decode_string) + 1) / len(decode_string) * 100
+                else:
+                    frequency[i] = 1 / len(decode_string) * 100
+        sum_of_delta = 0
+        for letter in frequency.keys():
+            sum_of_delta += (frequency_alphabet[letter] - frequency[letter])**2
+        if sum_of_delta < min_sum_of_delta:
+            min_sum_of_delta = sum_of_delta
+            min_delta_shift = shift
+    return Decode(string, min_delta_shift, language)
+
+
+def Cipher():
+    window = Make_window()
     while True:
         event, value = window.read()
         if event == sg.WIN_CLOSED or event == 'Back':
@@ -64,7 +95,10 @@ def cipher():
             if value['type of action'] == 'encode':
                 window['output'].Update(Encode(value['input'], value['shift'], value['language']))
             if value['type of action'] == 'decode':
-                window['output'].Update(Decode(value['input'], value['shift'], value['language']))
+                if value['shift'] == 'decode without shift':
+                    window['output'].Update(DecodeWithoutShift(value['input'], value['language']))
+                else:
+                    window['output'].Update(Decode(value['input'], value['shift'], value['language']))
     window.close()
 
 
