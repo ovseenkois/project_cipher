@@ -45,13 +45,15 @@ def Make_window():
               [sg.Multiline(size=(50, 10), expand_x=True, key='input')],
               [sg.Text('Alphabet'), sg.Text('Type of operation'), sg.Text('Shift')],
               [sg.Combo(['rus', 'eng'], default_value='rus', readonly=True, key='language'),
+               sg.Text(''),
                sg.Combo(['encode', 'decode'], default_value='encode', readonly=True, key='type of action'),
+               sg.Text('     '),
                sg.Combo(list_shifts, default_value='3', readonly=True, key='shift')],
               [sg.Button('Apply', expand_x=True)],
               [sg.Text('Result:')],
               [sg.Text('Output file: '), sg.InputText(do_not_clear=False, key='output file'), sg.FileBrowse()],
               [sg.Multiline(size=(50, 10), expand_x=True, key='output')]]
-    window = sg.Window('Caesar cipher', layout, size=(500, 500))
+    window = sg.Window('Caesar cipher', layout, size=(500, 600))
     return window
 
 
@@ -92,13 +94,48 @@ def Cipher():
             break
         window['output'].Update('')
         if event == 'Apply':
+            if value['input file'] != '':
+                try:
+                    input_file = open(value['input file'], 'r')
+                    input = input_file.read()
+                    input_file.close()
+                except:
+                    sg.popup_ok('no such directory or file')
+                    continue
+            else:
+                input = value['input']
+            if value['output file'] != '':
+                try:
+                    check = open(value['output file'], 'r')
+                    check.close()
+                    write_to_file = True
+                except:
+                    sg.popup_ok('no such directory or file')
+                    continue
+            else:
+                write_to_file = False
             if value['type of action'] == 'encode':
-                window['output'].Update(Encode(value['input'], value['shift'], value['language']))
+                if write_to_file:
+                    output_file = open(value['output file'], 'w')
+                    output_file.write(Encode(input, value['shift'], value['language']))
+                    output_file.close()
+                else:
+                    window['output'].Update(Encode(input, value['shift'], value['language']))
             if value['type of action'] == 'decode':
                 if value['shift'] == 'decode without shift':
-                    window['output'].Update(DecodeWithoutShift(value['input'], value['language']))
+                    if write_to_file:
+                        output_file = open(value['output file'], 'w')
+                        output_file.write(DecodeWithoutShift(input, value['language']))
+                        output_file.close()
+                    else:
+                        window['output'].Update(DecodeWithoutShift(input, value['language']))
                 else:
-                    window['output'].Update(Decode(value['input'], value['shift'], value['language']))
+                    if write_to_file:
+                        output_file = open(value['output file'], 'w')
+                        output_file.write(Decode(input, value['shift'], value['language']))
+                        output_file.close()
+                    else:
+                        window['output'].Update(Decode(input, value['shift'], value['language']))
     window.close()
 
 

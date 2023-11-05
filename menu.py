@@ -1,6 +1,4 @@
 import PySimpleGUI as sg
-import PySimpleGUI as sg
-import menu
 import caesar
 import visener
 import vernam
@@ -9,7 +7,7 @@ def Make_Window():
     layout = [[sg.Button('Caesar cipher', expand_x=True, expand_y=True)],
               [sg.Button('Visener cipher', expand_x=True, expand_y=True)],
               [sg.Button('Vernam cipher', expand_x=True, expand_y=True)]]
-    window = sg.Window('Menu', layout, size=(500, 500))
+    window = sg.Window('Menu', layout, size=(500, 600))
     return window
 
 def Cipher():

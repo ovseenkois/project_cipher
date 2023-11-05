@@ -13,7 +13,7 @@ def Encode(string, key, language):
             code_string = alphabet.index(string[i].lower())
             code_key = alphabet.index(key[i % len(key)].lower())
             new_string.append(alphabet[(code_string + code_key) % len_alphabet])
-        elif string in alphabet.upper():
+        elif string[i] in alphabet.upper():
             code_string = alphabet.index(string[i].lower())
             code_key = alphabet.index(key[i % len(key)].lower())
             new_string.append(alphabet[(code_string + code_key) % len_alphabet].upper())
@@ -44,15 +44,18 @@ def Decode(string, key, language):
 def Make_window():
     layout = [[sg.Button('Back')],
               [sg.Text('Text:')],
+              [sg.Text('Input file: '), sg.InputText(do_not_clear=False, key='input file'), sg.FileBrowse()],
               [sg.Multiline(size=(50, 10), expand_x=True, key='input')],
-              [sg.Text('Alphabet'), sg.Text('Type of operation'), sg.Text('Key')],
+              [sg.Text('Alphabet'), sg.Text('Type of operation'), sg.Text('Key'),
+               sg.InputText(key='key file', size=(15,1), do_not_clear=False), sg.FileBrowse()],
               [sg.Combo(['rus', 'eng'], default_value='rus', readonly=True, key='language'),
                sg.Combo(['encode', 'decode'], default_value='encode', readonly=True, key='type of action'),
                sg.InputText(key='key')],
               [sg.Button('Apply', expand_x=True)],
               [sg.Text('Result:')],
+              [sg.Text('Output file: '), sg.InputText(do_not_clear=False, key='output file'), sg.FileBrowse()],
               [sg.Multiline(size=(50, 10), expand_x=True, key='output')]]
-    window = sg.Window('Visener cipher', layout, size=(500, 500))
+    window = sg.Window('Visener cipher', layout, size=(500, 600))
     return window
 
 def Cipher():
@@ -63,9 +66,48 @@ def Cipher():
             break
         window['output'].Update('')
         if event == 'Apply':
+            if value['input file'] != '':
+                try:
+                    input_file = open(value['input file'], 'r')
+                    input = input_file.read()
+                    input_file.close()
+                except:
+                    sg.popup_ok('no such directory or file')
+                    continue
+            else:
+                input = value['input']
+            if value['output file'] != '':
+                try:
+                    check = open(value['output file'], 'r')
+                    check.close()
+                    write_to_file = True
+                except:
+                    sg.popup_ok('no such directory or file')
+                    continue
+            else:
+                write_to_file = False
+            if value['key file'] != '':
+                try:
+                    key_file = open(value['key file'], 'r')
+                    key = key_file.read()
+                    key_file.close()
+                except:
+                    sg.popup_ok('no such directory or file')
+            else:
+                key = value['key']
             if value['type of action'] == 'encode':
-                window['output'].Update(Encode(value['input'], value['key'], value['language']))
+                if write_to_file:
+                    output_file = open(value['output file'], 'w')
+                    output_file.write(Encode(input, key, value['language']))
+                    output_file.close()
+                else:
+                    window['output'].Update(Encode(input, key, value['language']))
             if value['type of action'] == 'decode':
-                window['output'].Update(Decode(value['input'], value['key'], value['language']))
+                if write_to_file:
+                    output_file = open(value['output file'], 'w')
+                    output_file.write(Decode(input, key, value['language']))
+                    output_file.close()
+                else:
+                    window['output'].Update(Decode(input, key, value['language']))
     window.close()
 
